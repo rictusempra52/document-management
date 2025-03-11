@@ -16,14 +16,14 @@ export default function DocumentList({
     const [editingId, setEditingId] = useState<number | null>(null);
 
     // ドキュメントの更新
-    const handleUpdate = async (id: number, title: string, content: string) => {
+    const handleUpdate = async (id: number, title: string) => {
         try {
             const response = await fetch(`/api/documents/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ title, content }),
+                body: JSON.stringify({ title }),
             });
 
             if (response.ok) {
@@ -63,6 +63,13 @@ export default function DocumentList({
         });
     };
 
+    // ファイルサイズのフォーマット
+    const formatFileSize = (bytes: number) => {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    };
+
     if (documents.length === 0) {
         return <p>ドキュメントがありません。</p>;
     }
@@ -80,8 +87,7 @@ export default function DocumentList({
                             <h3 className="text-lg font-semibold">ドキュメントの編集</h3>
                             <DocumentForm
                                 initialTitle={doc.title}
-                                initialContent={doc.content}
-                                onSubmit={(title, content) => handleUpdate(doc.id, title, content)}
+                                onSubmit={(title) => handleUpdate(doc.id, title)}
                                 buttonText="更新"
                             />
                             <button
@@ -95,10 +101,21 @@ export default function DocumentList({
                         // ドキュメント表示
                         <>
                             <h3 className="text-lg font-semibold">{doc.title}</h3>
-                            <p className="mt-2 text-gray-600 whitespace-pre-wrap">{doc.content}</p>
+                            {doc.ocrText && (
+                                <div className="mt-2 p-3 bg-gray-50 rounded-md">
+                                    <h4 className="text-sm font-medium text-gray-700 mb-1">OCRテキスト</h4>
+                                    <p className="text-gray-600 whitespace-pre-wrap text-sm">{doc.ocrText}</p>
+                                </div>
+                            )}
                             <div className="mt-4 text-sm text-gray-500">
+                                <p>ファイル名: {doc.fileName}</p>
+                                <p>ファイルサイズ: {formatFileSize(doc.fileSize)}</p>
+                                <p>タイプ: {doc.mimeType}</p>
                                 <p>作成: {formatDate(doc.createdAt)}</p>
                                 <p>更新: {formatDate(doc.updatedAt)}</p>
+                                {doc.building && (
+                                    <p>マンション: {doc.building.name}</p>
+                                )}
                             </div>
                             <div className="mt-4 space-x-2">
                                 <button

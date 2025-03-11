@@ -12,12 +12,51 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// ドキュメントモデル
+// マンションモデル
+model Building {
+  id        Int       @id @default(autoincrement())
+  name      String    // マンション名
+  address   String    // 住所
+  documents Document[] // マンションに関連する書類
+  users     User[]    @relation("BuildingUsers") // マンションに関連するユーザー
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// 書類モデル
 model Document {
   id          Int      @id @default(autoincrement())
-  title       String
-  content     String
+  title       String   // 書類のタイトル
+  fileName    String   // アップロードされたファイルの名前
+  filePath    String   // ファイルの保存パス
+  mimeType    String   // ファイルのMIMEタイプ
+  fileSize    Int      // ファイルサイズ（バイト）
+  ocrText     String?  // OCRで抽出されたテキスト
+  building    Building @relation(fields: [buildingId], references: [id])
+  buildingId  Int      // マンションとの関連付け
+  uploadedBy  User     @relation(fields: [userId], references: [id])
+  userId      Int      // アップロードしたユーザー
+  isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  isPublished Boolean  @default(false)
+}
+
+// ユーザーモデル
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  name      String
+  password  String
+  role      Role       @default(USER)
+  documents Document[] // ユーザーがアップロードした書類
+  buildings Building[] @relation("BuildingUsers") // ユーザーが関連するマンション
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+// ユーザーロール
+enum Role {
+  ADMIN     // システム管理者
+  MANAGER   // マンション管理者
+  USER      // 一般ユーザー
 }
