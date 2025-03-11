@@ -1,29 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { Document } from "@/types/document";
+import { Document, Building } from "@/types/document";
 import DocumentForm from "./DocumentForm";
 
 interface DocumentListProps {
     documents: Document[];
+    buildings: Building[];
     onDocumentDeleted: () => void;
 }
 
 export default function DocumentList({
     documents,
+    buildings,
     onDocumentDeleted,
 }: DocumentListProps) {
     const [editingId, setEditingId] = useState<number | null>(null);
 
     // ドキュメントの更新
-    const handleUpdate = async (id: number, title: string) => {
+    const handleUpdate = async (id: number, title: string, file: File, buildingId: number) => {
         try {
+            // FormDataを使用してマルチパートフォームデータを作成
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('file', file);
+            formData.append('buildingId', buildingId.toString());
+
             const response = await fetch(`/api/documents/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ title }),
+                body: formData, // JSON形式ではなくFormDataを送信
             });
 
             if (response.ok) {
@@ -87,7 +92,9 @@ export default function DocumentList({
                             <h3 className="text-lg font-semibold">ドキュメントの編集</h3>
                             <DocumentForm
                                 initialTitle={doc.title}
-                                onSubmit={(title) => handleUpdate(doc.id, title)}
+                                buildings={buildings}
+                                onSubmit={(title, file, buildingId) => 
+                                    handleUpdate(doc.id, title, file, buildingId)}
                                 buttonText="更新"
                             />
                             <button
@@ -101,18 +108,21 @@ export default function DocumentList({
                         // ドキュメント表示
                         <>
                             <h3 className="text-lg font-semibold">{doc.title}</h3>
+                            {/* OCRテキストの表示 */}
                             {doc.ocrText && (
                                 <div className="mt-2 p-3 bg-gray-50 rounded-md">
                                     <h4 className="text-sm font-medium text-gray-700 mb-1">OCRテキスト</h4>
                                     <p className="text-gray-600 whitespace-pre-wrap text-sm">{doc.ocrText}</p>
                                 </div>
                             )}
+                            {/* ファイル情報の表示 */}
                             <div className="mt-4 text-sm text-gray-500">
                                 <p>ファイル名: {doc.fileName}</p>
                                 <p>ファイルサイズ: {formatFileSize(doc.fileSize)}</p>
                                 <p>タイプ: {doc.mimeType}</p>
                                 <p>作成: {formatDate(doc.createdAt)}</p>
                                 <p>更新: {formatDate(doc.updatedAt)}</p>
+                                {/* マンション情報の表示 */}
                                 {doc.building && (
                                     <p>マンション: {doc.building.name}</p>
                                 )}

@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Document } from "@/types/document";
+import { Document, Building } from "@/types/document";
 import DocumentList from "@/components/DocumentList";
 import DocumentForm from "@/components/DocumentForm";
 
 export default function Home() {
-  // ドキュメント一覧の状態管理
+  // 状態管理
   const [documents, setDocuments] = useState<Document[]>([]);
-  // 読み込み状態の管理
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ドキュメント一覧を取得
+  // ドキュメント一覧の取得
   const fetchDocuments = async () => {
     try {
       const response = await fetch("/api/documents");
@@ -24,50 +24,72 @@ export default function Home() {
     }
   };
 
-  // 新規ドキュメントの作成
-  const createDocument = async (title: string, content: string) => {
+  // マンション一覧の取得
+  const fetchBuildings = async () => {
     try {
-      const response = await fetch("/api/documents", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title, content }),
-      });
-
-      if (response.ok) {
-        // 作成成功後、一覧を更新
-        fetchDocuments();
-      }
+      const response = await fetch("/api/buildings");
+      const data = await response.json();
+      setBuildings(data);
     } catch (error) {
-      console.error("ドキュメントの作成に失敗しました:", error);
+      console.error("マンション一覧の取得に失敗しました:", error);
     }
   };
 
-  // コンポーネントのマウント時にドキュメント一覧を取得
+  // 新規ドキュメントのアップロード
+  const handleUpload = async (title: string, file: File, buildingId: number) => {
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('file', file);
+      formData.append('buildingId', buildingId.toString());
+
+      const response = await fetch("/api/documents", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        // アップロード成功後、一覧を更新
+        fetchDocuments();
+      }
+    } catch (error) {
+      console.error("ドキュメントのアップロードに失敗しました:", error);
+    }
+  };
+
+  // コンポーネントのマウント時にデータを取得
   useEffect(() => {
+    fetchBuildings();
     fetchDocuments();
   }, []);
 
   if (loading) {
-    return <div>読み込み中...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">ドキュメント管理システム</h1>
+      <h1 className="text-3xl font-bold mb-8">マンション書類管理システム</h1>
       
-      {/* 新規作成フォーム */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">新規ドキュメント作成</h2>
-        <DocumentForm onSubmit={createDocument} />
+      {/* 新規アップロードフォーム */}
+      <section className="mb-12 bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">書類のアップロード</h2>
+        <DocumentForm
+          buildings={buildings}
+          onSubmit={handleUpload}
+        />
       </section>
 
       {/* ドキュメント一覧 */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">ドキュメント一覧</h2>
+        <h2 className="text-xl font-semibold mb-4">書類一覧</h2>
         <DocumentList
           documents={documents}
+          buildings={buildings}
           onDocumentDeleted={fetchDocuments}
         />
       </section>
