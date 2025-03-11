@@ -1,0 +1,23 @@
+// Prismaスキーマファイル
+// このファイルでデータベースの構造を定義します
+
+// データベースの設定
+datasource db {
+  provider = "sqlite" // SQLiteを使用
+  url      = "file:./dev.db" // データベースファイルのパス
+}
+
+// Prisma Clientの設定
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ドキュメントモデル
+model Document {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isPublished Boolean  @default(false)
+}
