@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    // コンパイル出力のJavaScriptバージョンを指定
+    "target": "ES2020",
+    
+    // CommonJSモジュールシステムを使用（Node.jsの標準）
+    "module": "CommonJS",
+    
+    // 型チェックを厳密に行う
+    "strict": true,
+    
+    // CommonJSモジュールとESモジュールの相互運用を可能にする
+    "esModuleInterop": true
+  },
+  
+  // コンパイル対象のファイルを指定
+  "include": ["prisma/seed.ts"]
+}

@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -11,7 +11,7 @@ async function main() {
         name: "管理者",
         // 注意: 実際のアプリケーションではパスワードはハッシュ化して保存する必要があります
         password: "admin123",
-        role: Role.ADMIN,
+        role: "ADMIN",
       },
     });
 
@@ -52,7 +52,7 @@ async function main() {
         email: "user@example.com",
         name: "一般ユーザー",
         password: "user123",
-        role: Role.USER,
+        role: "USER",
         // ユーザーをマンションAに関連付け
         buildings: {
           connect: {
@@ -70,7 +70,7 @@ async function main() {
         email: "manager@example.com",
         name: "マンション管理者",
         password: "manager123",
-        role: Role.MANAGER,
+        role: "MANAGER",
         // 管理者を両方のマンションに関連付け
         buildings: {
           connect: buildings.map((b) => ({ id: b.id })),

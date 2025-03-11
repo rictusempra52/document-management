@@ -1,26 +1,37 @@
 {
   "compilerOptions": {
+    // プロジェクトのルート設定
+    "baseUrl": ".",
+    
+    // ECMAScriptのバージョン設定
+    "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "target": "ES6",
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
+    
+    // モジュールの設定
     "module": "esnext",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    
+    // エイリアスパスの設定（@/でインポートできるようにする）
+    "paths": {
+      "@/*": ["./*"]
+    },
+
+    // その他の設定
+    "allowJs": true,          // JavaScriptファイルの使用を許可
+    "skipLibCheck": true,     // 型定義ファイルのチェックをスキップ
+    "strict": true,           // 厳格な型チェックを有効化
+    "forceConsistentCasingInFileNames": true,  // ファイル名の大文字小文字を区別
+    "noEmit": true,          // コンパイル結果を出力しない
+    "esModuleInterop": true, // CommonJSモジュールとESモジュールの相互運用を可能に
+    "resolveJsonModule": true, // JSONモジュールのインポートを可能に
+    "isolatedModules": true,  // ファイルを個別のモジュールとして扱う
+    "jsx": "preserve",        // JSXの処理方法を指定
+    "incremental": true,      // 差分ビルドを有効化
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./*"]
-    }
+    ]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

@@ -47,16 +47,9 @@ model User {
   email     String     @unique
   name      String
   password  String
-  role      Role       @default(USER)
+  role      String     @default("USER") // ADMIN, MANAGER, USER のいずれかの値を持つ
   documents Document[] // ユーザーがアップロードした書類
   buildings Building[] @relation("BuildingUsers") // ユーザーが関連するマンション
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-}
-
-// ユーザーロール
-enum Role {
-  ADMIN     // システム管理者
-  MANAGER   // マンション管理者
-  USER      // 一般ユーザー
 }

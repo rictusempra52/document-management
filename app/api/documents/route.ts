@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { createWorker } from "tesseract.js";
+import { ImageAnnotatorClient } from "@google-cloud/vision";
 
 // ドキュメント一覧の取得
 export async function GET() {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const title = formData.get("title") as string;
     const buildingId = parseInt(formData.get("buildingId") as string);
     const file = formData.get("file") as File;
-    
+
     if (!title || !file || !buildingId) {
       return NextResponse.json(
         { error: "タイトル、ファイル、マンションは必須です" },
@@ -123,15 +123,22 @@ async function createUploadDirectory(dir: string) {
 
 // OCR処理の実行
 async function performOCR(imagePath: string): Promise<string> {
-  const worker = await createWorker("jpn");
-  
+  const client = new ImageAnnotatorClient();
+
   try {
-    const { data: { text } } = await worker.recognize(imagePath);
-    await worker.terminate();
-    return text;
+    // ファイルを読み込んでGoogle Cloud Vision APIに送信
+    const [result] = await client.textDetection(imagePath);
+    const detections = result.textAnnotations;
+
+    // 検出されたテキストがない場合は空文字を返す
+    if (!detections || detections.length === 0) {
+      return "";
+    }
+
+    // 最初の要素が全体のテキスト
+    return detections[0].description || "";
   } catch (error) {
     console.error("OCR処理エラー:", error);
-    await worker.terminate();
     return "";
   }
 }
