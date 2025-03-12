@@ -27,4 +27,4 @@ yarn-error.log*
 next-env.d.ts
 
 # API keys
-.document-management-453416-146b0ca612cb.json
+./document-management-453416-146b0ca612cb.json
